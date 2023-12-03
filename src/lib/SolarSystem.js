@@ -29,7 +29,7 @@ solarSystem.add(solarGroup);
 const mercury = new CelestialBody(
   MERCURY_RADIUS,
   MERCURY_DISTANCE,
-  "mercury.png",
+  "2k_mercury.jpg",
   MERCURY_POLAR_RADIUS
 );
 
