@@ -16,13 +16,23 @@ function createBody({ radius, flattening, texture, distance = 0 }) {
 
 export const solarSystem = new THREE.Group();
 
-export const sun = { mesh: createBody(SUN), spinSpeed: SUN.spinSpeed };
+const sun = { mesh: createBody(SUN), spinSpeed: SUN.spinSpeed };
 solarSystem.add(sun.mesh);
 
-export const planets = PLANETS.map((planet) => {
+const planets = PLANETS.map((planet) => {
   const mesh = createBody(planet);
   const orbit = new THREE.Group();
   orbit.add(mesh);
   solarSystem.add(orbit);
   return { ...planet, mesh, orbit };
 });
+
+export const earth = planets.find((planet) => planet.name === "earth").mesh;
+
+export function tick() {
+  for (const { orbit, mesh, orbitSpeed, spinSpeed } of planets) {
+    orbit.rotation.y += orbitSpeed;
+    mesh.rotation.y += spinSpeed;
+  }
+  sun.mesh.rotation.y += sun.spinSpeed;
+}

@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+const followedPosition = new THREE.Vector3();
+
 export default class SceneInit {
   constructor(content, fov = 30) {
     this.camera = new THREE.PerspectiveCamera(
@@ -21,6 +23,14 @@ export default class SceneInit {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     window.addEventListener("resize", () => this.onWindowResize());
+  }
+
+  follow(mesh, distance = 20) {
+    mesh.getWorldPosition(followedPosition);
+    this.controls.target.copy(followedPosition);
+    this.camera.position
+      .copy(followedPosition)
+      .setZ(followedPosition.z + distance);
   }
 
   render() {
