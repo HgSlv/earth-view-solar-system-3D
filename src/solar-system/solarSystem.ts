@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { SUN, PLANETS, EARTH, type CelestialBody } from "./bodies";
-import { advance, type MovingBody } from "./motion";
+import { placeAt, type MovingBody } from "./motion";
 import { loadColorTexture } from "../loadColorTexture";
 
 function linearColor(hex: number): THREE.Color {
@@ -15,6 +15,7 @@ const NIGHT_SIDE_FILL = 0.08 * Math.PI;
 const NIGHT_SIDE_COLOR = linearColor(0x404a66);
 const NO_RANGE_LIMIT = 0;
 const NO_DECAY = 0;
+const EUROPE_AND_AFRICA_LONGITUDE = 15;
 const SUN_GLOW_SIZE_IN_RADII = 3;
 const GLOW_TEXTURE_SIZE = 128;
 
@@ -23,12 +24,7 @@ type TexturedMaterial = new (parameters: {
 }) => THREE.Material;
 
 function createBody(
-  {
-    radius,
-    flattening,
-    texture,
-    distance = 0,
-  }: CelestialBody & { distance?: number },
+  { radius, flattening, texture }: CelestialBody,
   material: TexturedMaterial,
 ): THREE.Mesh {
   const geometry = new THREE.SphereGeometry(
@@ -37,12 +33,28 @@ function createBody(
     SPHERE_SEGMENTS,
   );
   geometry.scale(1, 1 - flattening, 1);
-  const mesh = new THREE.Mesh(
+  return new THREE.Mesh(
     geometry,
     new material({ map: loadColorTexture(texture) }),
   );
-  mesh.position.x = distance;
-  return mesh;
+}
+
+// The spin axis lives on a separate parent so it keeps pointing the same way all orbit long.
+function createTiltedAxis(
+  mesh: THREE.Mesh,
+  { axialTiltDegrees }: CelestialBody,
+): THREE.Group {
+  const axis = new THREE.Group();
+  axis.rotation.z = THREE.MathUtils.degToRad(axialTiltDegrees);
+  axis.add(mesh);
+  return axis;
+}
+
+// SphereGeometry puts the map's prime meridian on +x and the camera looks from +z.
+function turnToFaceCamera(mesh: THREE.Mesh, longitudeDegrees: number): void {
+  mesh.geometry.rotateY(
+    -Math.PI / 2 - THREE.MathUtils.degToRad(longitudeDegrees),
+  );
 }
 
 function createGlowTexture(): THREE.CanvasTexture {
@@ -88,7 +100,7 @@ const sun = {
   spinSpeed: SUN.spinSpeed,
 };
 solarSystem.add(
-  sun.mesh,
+  createTiltedAxis(sun.mesh, SUN),
   createSunGlow(),
   new THREE.PointLight(
     SUNLIGHT_COLOR,
@@ -101,20 +113,18 @@ solarSystem.add(
 
 const planets = PLANETS.map((planet) => {
   const mesh = createBody(planet, THREE.MeshStandardMaterial);
-  const orbit = new THREE.Group();
-  orbit.add(mesh);
-  solarSystem.add(orbit);
-  return {
-    mesh,
-    orbit,
-    spinSpeed: planet.spinSpeed,
-    orbitSpeed: planet.orbitSpeed,
-  };
+  const carrier = createTiltedAxis(mesh, planet);
+  solarSystem.add(carrier);
+  return { mesh, spinSpeed: planet.spinSpeed, carrier, orbit: planet };
 });
 export const earth = planets[PLANETS.indexOf(EARTH)].mesh;
+turnToFaceCamera(earth, EUROPE_AND_AFRICA_LONGITUDE);
 
 const movingBodies: readonly MovingBody[] = [sun, ...planets];
+let simulatedSeconds = 0;
+placeAt(movingBodies, simulatedSeconds);
 
 export function tick(elapsedSeconds: number): void {
-  advance(movingBodies, elapsedSeconds);
+  simulatedSeconds += elapsedSeconds;
+  placeAt(movingBodies, simulatedSeconds);
 }
