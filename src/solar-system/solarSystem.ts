@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { SUN, PLANETS } from "./bodies";
+import { SUN, PLANETS, type CelestialBody } from "./bodies";
 import { loadColorTexture } from "../loadColorTexture";
 
-function linearColor(red, green, blue) {
+function linearColor(red: number, green: number, blue: number): THREE.Color {
   return new THREE.Color().setRGB(
     red / 255,
     green / 255,
@@ -21,7 +21,19 @@ const NIGHT_SIDE_COLOR = linearColor(0x40, 0x4a, 0x66);
 const SUN_GLOW_SIZE_IN_RADII = 3;
 const GLOW_TEXTURE_SIZE = 128;
 
-function createBody({ radius, flattening, texture, distance = 0 }, material) {
+type TexturedMaterial = new (parameters: {
+  map: THREE.Texture;
+}) => THREE.Material;
+
+function createBody(
+  {
+    radius,
+    flattening,
+    texture,
+    distance = 0,
+  }: CelestialBody & { distance?: number },
+  material: TexturedMaterial,
+): THREE.Mesh {
   const geometry = new THREE.SphereGeometry(
     radius,
     SPHERE_SEGMENTS,
@@ -36,10 +48,11 @@ function createBody({ radius, flattening, texture, distance = 0 }, material) {
   return mesh;
 }
 
-function createGlowTexture() {
+function createGlowTexture(): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = GLOW_TEXTURE_SIZE;
   const context = canvas.getContext("2d");
+  if (!context) throw new Error("2D canvas is not supported");
   const center = GLOW_TEXTURE_SIZE / 2;
   const gradient = context.createRadialGradient(
     center,
@@ -58,7 +71,7 @@ function createGlowTexture() {
   return new THREE.CanvasTexture(canvas);
 }
 
-function createSunGlow() {
+function createSunGlow(): THREE.Sprite {
   const glow = new THREE.Sprite(
     new THREE.SpriteMaterial({
       map: createGlowTexture(),
@@ -93,9 +106,11 @@ const planets = PLANETS.map((planet) => {
   solarSystem.add(orbit);
   return { ...planet, mesh, orbit };
 });
-export const earth = planets.find((planet) => planet.name === "earth").mesh;
+const earthPlanet = planets.find((planet) => planet.name === "earth");
+if (!earthPlanet) throw new Error("Earth is missing from PLANETS");
+export const earth = earthPlanet.mesh;
 
-export function tick() {
+export function tick(): void {
   for (const { orbit, mesh, orbitSpeed, spinSpeed } of planets) {
     orbit.rotation.y += orbitSpeed;
     mesh.rotation.y += spinSpeed;

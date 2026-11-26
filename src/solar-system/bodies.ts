@@ -3,14 +3,27 @@ const EARTH_DISTANCE = 147.47;
 const EARTH_ORBIT_SPEED = 10 * Math.PI * (1 / 60) * (1 / 60); // radians per frame standing in for 107,000 km/h
 const EARTH_SPIN_SPEED = EARTH_ORBIT_SPEED / 1674.4; // scaled from the 1674.4 km/h equatorial speed
 
-export const SUN = {
+export interface CelestialBody {
+  radius: number;
+  flattening: number;
+  texture: string;
+  spinSpeed: number;
+}
+
+export interface Planet extends CelestialBody {
+  name: string;
+  distance: number;
+  orbitSpeed: number;
+}
+
+export const SUN: CelestialBody = {
   radius: EARTH_RADIUS * 109,
   flattening: 0.00015,
   texture: "2k_sun.jpg",
   spinSpeed: EARTH_SPIN_SPEED * 14.8,
 };
 
-export const PLANETS = [
+export const PLANETS: readonly Planet[] = [
   {
     name: "mercury",
     radius: EARTH_RADIUS * 0.38,
