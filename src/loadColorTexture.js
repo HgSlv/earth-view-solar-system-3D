@@ -4,6 +4,6 @@ const textureLoader = new THREE.TextureLoader();
 
 export function loadColorTexture(file) {
   const texture = textureLoader.load(file);
-  texture.encoding = THREE.sRGBEncoding;
+  texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }

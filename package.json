@@ -10,7 +10,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "three": "^0.126.0"
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

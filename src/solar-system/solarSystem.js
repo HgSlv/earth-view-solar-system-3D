@@ -2,9 +2,22 @@ import * as THREE from "three";
 import { SUN, PLANETS } from "./bodies";
 import { loadColorTexture } from "../loadColorTexture";
 
+function linearColor(red, green, blue) {
+  return new THREE.Color().setRGB(
+    red / 255,
+    green / 255,
+    blue / 255,
+    THREE.LinearSRGBColorSpace,
+  );
+}
+
 const SPHERE_SEGMENTS = 64;
-const SUNLIGHT_INTENSITY = 2.2;
-const NIGHT_SIDE_FILL = 0.08;
+// Light intensities include the π that three's physically based lights (r155+) no
+// longer apply implicitly; colours are linear to keep the original tint.
+const SUNLIGHT_INTENSITY = 2.2 * Math.PI;
+const SUNLIGHT_COLOR = linearColor(0xff, 0xf4, 0xe0);
+const NIGHT_SIDE_FILL = 0.08 * Math.PI;
+const NIGHT_SIDE_COLOR = linearColor(0x40, 0x4a, 0x66);
 const SUN_GLOW_SIZE_IN_RADII = 3;
 const GLOW_TEXTURE_SIZE = 128;
 
@@ -68,8 +81,9 @@ const sun = {
 solarSystem.add(
   sun.mesh,
   createSunGlow(),
-  new THREE.PointLight(0xfff4e0, SUNLIGHT_INTENSITY),
-  new THREE.AmbientLight(0x404a66, NIGHT_SIDE_FILL),
+  // Distance 0 and decay 0: sunlight doesn't fade across the scene.
+  new THREE.PointLight(SUNLIGHT_COLOR, SUNLIGHT_INTENSITY, 0, 0),
+  new THREE.AmbientLight(NIGHT_SIDE_COLOR, NIGHT_SIDE_FILL),
 );
 
 const planets = PLANETS.map((planet) => {
