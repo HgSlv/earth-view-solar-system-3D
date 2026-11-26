@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { SUN, PLANETS, type CelestialBody } from "./bodies";
+import { advance, type MovingBody } from "./motion";
 import { loadColorTexture } from "../loadColorTexture";
 
 function linearColor(red: number, green: number, blue: number): THREE.Color {
@@ -110,10 +111,8 @@ const earthPlanet = planets.find((planet) => planet.name === "earth");
 if (!earthPlanet) throw new Error("Earth is missing from PLANETS");
 export const earth = earthPlanet.mesh;
 
+const movingBodies: readonly MovingBody[] = [sun, ...planets];
+
 export function tick(elapsedSeconds: number): void {
-  for (const { orbit, mesh, orbitSpeed, spinSpeed } of planets) {
-    orbit.rotation.y += orbitSpeed * elapsedSeconds;
-    mesh.rotation.y += spinSpeed * elapsedSeconds;
-  }
-  sun.mesh.rotation.y += sun.spinSpeed * elapsedSeconds;
+  advance(movingBodies, elapsedSeconds);
 }
