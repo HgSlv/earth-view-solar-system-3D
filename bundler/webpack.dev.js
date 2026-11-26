@@ -9,6 +9,7 @@ const infoColor = (_message) => {
 
 module.exports = merge(commonConfiguration, {
   mode: "development",
+  devtool: "source-map",
   devServer: {
     host: "0.0.0.0",
     port: portFinderSync.getPort(8080),

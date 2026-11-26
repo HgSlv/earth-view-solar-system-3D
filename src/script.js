@@ -1,53 +1,30 @@
 import "./style.css";
 import * as THREE from "three";
 import SceneInit from "./lib/SceneInit";
+import { solarSystem, sun, planets } from "./lib/SolarSystem";
 
-import {
-  mercuryMesh,
-  mercurySystem,
-  venusMesh,
-  venusSystem,
-  earthMesh,
-  earthSystem,
-  marsMesh,
-  marsSystem,
-  sunMesh,
-  solarSystem,
-} from "./lib/SolarSystem";
-import { EARTH_YEAR, EARTH_DAY } from "./utils/constUtils";
+const CAMERA_DISTANCE_FROM_EARTH = 20;
+
+const sceneInit = new SceneInit(solarSystem);
+const earthMesh = planets.find((planet) => planet.name === "earth").mesh;
+const earthWorldPosition = new THREE.Vector3();
 
 const animate = () => {
-  // animate the planet revolution around the sun
-  mercurySystem.rotation.y += EARTH_YEAR * 4;
-  venusSystem.rotation.y += EARTH_YEAR * 2;
-  earthSystem.rotation.y += EARTH_YEAR;
-  marsSystem.rotation.y += EARTH_YEAR * 0.5;
+  for (const { orbit, mesh, orbitSpeed, spinSpeed } of planets) {
+    orbit.rotation.y += orbitSpeed;
+    mesh.rotation.y += spinSpeed;
+  }
+  sun.mesh.rotation.y += sun.spinSpeed;
 
-  // animate the planet self rotation
-  mercuryMesh.rotation.y += EARTH_DAY * 58.6;
-  venusMesh.rotation.y += -EARTH_DAY * 243;
-  earthMesh.rotation.y += EARTH_DAY * 1;
-  marsMesh.rotation.y += EARTH_DAY * 1.03;
-
-  sunMesh.rotation.y += EARTH_DAY * 14.8;
-
-  // Update the camera to look at Earth's world position
-  const earthWorldPosition = new THREE.Vector3();
   earthMesh.getWorldPosition(earthWorldPosition);
+  sceneInit.controls.target.copy(earthWorldPosition);
+  sceneInit.camera.position
+    .copy(earthWorldPosition)
+    .setZ(earthWorldPosition.z + CAMERA_DISTANCE_FROM_EARTH);
 
-  ThreeJs.controls.target.copy(earthWorldPosition);
-
-  ThreeJs.camera.position.x = earthWorldPosition.x;
-  ThreeJs.camera.position.y = earthWorldPosition.y;
-  ThreeJs.camera.position.z = earthWorldPosition.z + 20;
-
+  sceneInit.render();
+  sceneInit.controls.update();
   window.requestAnimationFrame(animate);
-  ThreeJs.render();
-  ThreeJs.stats.update();
-  ThreeJs.controls.update();
 };
-
-let ThreeJs = new SceneInit();
-ThreeJs.initScene(solarSystem);
 
 animate();

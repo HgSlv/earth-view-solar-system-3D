@@ -9,7 +9,6 @@ module.exports = {
     filename: "bundle.[contenthash].js",
     path: path.resolve(__dirname, "../dist"),
   },
-  devtool: "source-map",
   plugins: [
     new CopyWebpackPlugin({
       patterns: [{ from: path.resolve(__dirname, "../static") }],
@@ -22,49 +21,9 @@ module.exports = {
   ],
   module: {
     rules: [
-      // HTML
-      {
-        test: /\.(html)$/,
-        use: ["html-loader"],
-      },
-
-      // JS
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: ["babel-loader"],
-      },
-
-      // CSS
       {
         test: /\.css$/,
         use: [MiniCSSExtractPlugin.loader, "css-loader"],
-      },
-
-      // Images
-      {
-        test: /\.(jpg|png|gif|svg)$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              outputPath: "assets/images/",
-            },
-          },
-        ],
-      },
-
-      // Fonts
-      {
-        test: /\.(ttf|eot|woff|woff2)$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              outputPath: "assets/fonts/",
-            },
-          },
-        ],
       },
     ],
   },
