@@ -1,21 +1,13 @@
-const js = require("@eslint/js");
-const globals = require("globals");
-const prettier = require("eslint-config-prettier");
+import js from "@eslint/js";
+import globals from "globals";
+import prettier from "eslint-config-prettier";
 
-module.exports = [
+export default [
   { ignores: ["dist/"] },
   js.configs.recommended,
   {
     files: ["src/**/*.js"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      globals: globals.browser,
-    },
-  },
-  {
-    files: ["bundler/**/*.js", "eslint.config.js"],
-    languageOptions: { sourceType: "commonjs", globals: globals.node },
+    languageOptions: { globals: globals.browser },
   },
   { rules: { complexity: ["error", 10] } },
   prettier,
