@@ -85,9 +85,7 @@ export const KM_PER_UNIT = 10_000; // EARTH_RADIUS is 6,371 km
 // Earth shares a slower clock: the ISS takes this long and the rest, the Moon
 // included, follow Kepler's third law so they keep their real relative speeds.
 const ISS_ORBIT_SECONDS = 30;
-const semiMajorAxisAtAltitude = (altitudeKm: number) =>
-  EARTH_RADIUS + altitudeKm / KM_PER_UNIT;
-const ISS_SEMI_MAJOR_AXIS = semiMajorAxisAtAltitude(420);
+const ISS_SEMI_MAJOR_AXIS = EARTH_RADIUS + 420 / KM_PER_UNIT;
 
 export function satelliteOrbitSpeed(semiMajorAxis: number): number {
   return (
@@ -123,31 +121,16 @@ export const MOON: CelestialBody & Satellite = {
 
 export type SatelliteModel = "station" | "telescope";
 
-export interface ArtificialSatellite extends Satellite {
+export interface ArtificialSatellite {
   model: SatelliteModel;
+  // NORAD catalogue number: the key to its orbit in the satellite snapshot.
+  catalogNumber: number;
 }
 
-function artificial(
-  name: string,
-  model: SatelliteModel,
-  altitudeKm: number,
-  inclinationDegrees: number,
-  ascendingNodeDegrees: number,
-): ArtificialSatellite {
-  const semiMajorAxis = semiMajorAxisAtAltitude(altitudeKm);
-  return {
-    name,
-    model,
-    semiMajorAxis,
-    eccentricity: 0,
-    inclinationDegrees,
-    ascendingNodeDegrees,
-    orbitSpeed: satelliteOrbitSpeed(semiMajorAxis),
-  };
-}
+const ISS_CATALOG_NUMBER = 25544;
+const HUBBLE_CATALOG_NUMBER = 20580;
 
-// Inclinations are measured from Earth's equator.
 export const ARTIFICIAL_SATELLITES: readonly ArtificialSatellite[] = [
-  artificial("iss", "station", 420, 51.64, 0),
-  artificial("hubble", "telescope", 535, 28.47, 120),
+  { model: "station", catalogNumber: ISS_CATALOG_NUMBER },
+  { model: "telescope", catalogNumber: HUBBLE_CATALOG_NUMBER },
 ];

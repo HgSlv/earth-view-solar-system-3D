@@ -66,8 +66,13 @@ const builders: Record<SatelliteModel, () => THREE.Group> = {
   telescope: createTelescope,
 };
 
+/** A satellite model whose underside faces whatever it is pointed at with lookAt. */
 export function createSatelliteModel(model: SatelliteModel): THREE.Group {
   const satellite = builders[model]();
   satellite.scale.setScalar(MODEL_SIZE);
-  return satellite;
+  // Models are built underside-down (−y); lookAt aims +z.
+  satellite.rotation.x = -Math.PI / 2;
+  const facing = new THREE.Group();
+  facing.add(satellite);
+  return facing;
 }

@@ -34,6 +34,7 @@ const satellites = records.map((record) => [
   round(record.RA_OF_ASC_NODE, 3),
   round(record.ARG_OF_PERICENTER, 3),
   round(meanAnomalyAtLatest(record), 3),
+  record.NORAD_CAT_ID,
 ]);
 await writeFile(
   OUTPUT,
@@ -47,6 +48,7 @@ await writeFile(
       "ascendingNodeDegrees",
       "argumentOfPeriapsisDegrees",
       "meanAnomalyDegrees",
+      "catalogNumber",
     ],
     satellites,
   }),

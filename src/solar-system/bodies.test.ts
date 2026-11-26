@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import snapshotJson from "../../static/satellites.json?raw";
 import {
   ARTIFICIAL_SATELLITES,
   EARTH,
@@ -6,6 +7,7 @@ import {
   PLANETS,
   satelliteOrbitSpeed,
 } from "./bodies";
+import { catalogNumberOf, type OrbitRow } from "./swarm";
 
 describe("PLANETS", () => {
   it("includes Earth, which the camera follows", () => {
@@ -23,23 +25,10 @@ describe("PLANETS", () => {
 });
 
 describe("Earth's satellites", () => {
-  const satellites = [MOON, ...ARTIFICIAL_SATELLITES];
-
-  it("have unique names", () => {
-    const names = satellites.map((satellite) => satellite.name);
-    expect(new Set(names).size).toBe(names.length);
-  });
-
-  it("stay above Earth's surface at their closest", () => {
-    for (const { semiMajorAxis, eccentricity } of satellites) {
-      expect(semiMajorAxis * (1 - eccentricity)).toBeGreaterThan(EARTH.radius);
-    }
-  });
-
-  it("orbit inside the Moon's orbit", () => {
-    for (const satellite of ARTIFICIAL_SATELLITES) {
-      expect(satellite.semiMajorAxis).toBeLessThan(MOON.semiMajorAxis);
-    }
+  it("keep the Moon above Earth's surface at its closest", () => {
+    expect(MOON.semiMajorAxis * (1 - MOON.eccentricity)).toBeGreaterThan(
+      EARTH.radius,
+    );
   });
 
   it("orbit more slowly the farther out they are (Kepler's third law)", () => {
@@ -50,5 +39,15 @@ describe("Earth's satellites", () => {
 
   it("keeps the Moon tidally locked", () => {
     expect(MOON.spinSpeed).toBe(MOON.orbitSpeed);
+  });
+
+  it("finds every modelled satellite in the snapshot", () => {
+    const { satellites } = JSON.parse(snapshotJson) as {
+      satellites: OrbitRow[];
+    };
+    const catalogNumbers = satellites.map(catalogNumberOf);
+    for (const { catalogNumber } of ARTIFICIAL_SATELLITES) {
+      expect(catalogNumbers).toContain(catalogNumber);
+    }
   });
 });

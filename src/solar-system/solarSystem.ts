@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { SUN, PLANETS, EARTH } from "./bodies";
 import { createBody, createTiltedAxis } from "./bodyMesh";
-import { addEarthSatellites } from "./earthSatellites";
+import { addArtificialSatellites, addMoon } from "./earthSatellites";
 import { placeAt, type MovingBody } from "./motion";
 import { createSatelliteSwarm } from "./satelliteSwarm";
 
@@ -94,10 +94,14 @@ turnToFaceCamera(earth, EUROPE_AND_AFRICA_LONGITUDE);
 const movingBodies: readonly MovingBody[] = [
   sun,
   ...planets,
-  ...addEarthSatellites(earthPlanet.carrier),
+  addMoon(earthPlanet.carrier),
 ];
 const swarm = createSatelliteSwarm();
 earthPlanet.carrier.add(swarm.points);
+const moveArtificialSatellites = addArtificialSatellites(
+  earthPlanet.carrier,
+  swarm,
+);
 
 let simulatedSeconds = 0;
 placeAt(movingBodies, simulatedSeconds);
@@ -106,4 +110,5 @@ export function tick(elapsedSeconds: number): void {
   simulatedSeconds += elapsedSeconds;
   placeAt(movingBodies, simulatedSeconds);
   swarm.update(simulatedSeconds);
+  moveArtificialSatellites();
 }

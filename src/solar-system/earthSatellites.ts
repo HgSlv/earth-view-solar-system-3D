@@ -3,9 +3,9 @@ import { ARTIFICIAL_SATELLITES, EARTH, MOON, type Satellite } from "./bodies";
 import { createBody, createTiltedAxis } from "./bodyMesh";
 import type { MovingBody } from "./motion";
 import { createSatelliteModel } from "./satelliteModels";
+import type { SatelliteSwarm } from "./satelliteSwarm";
 
-// Turns the model's long axis along the orbit's normal and its −y side towards Earth.
-const NADIR_POINTING = -Math.PI / 2;
+const earthCenter = new THREE.Vector3();
 
 function createOrbitPlane(
   { inclinationDegrees, ascendingNodeDegrees }: Satellite,
@@ -47,22 +47,31 @@ function createMoon(): MovingBody & { plane: THREE.Group } {
   };
 }
 
-/** Attaches the Moon and artificial satellites to Earth's tilted, non-spinning carrier. */
-export function addEarthSatellites(earthCarrier: THREE.Object3D): MovingBody[] {
+/** Puts the Moon on its orbit around Earth's tilted, non-spinning carrier. */
+export function addMoon(earthCarrier: THREE.Object3D): MovingBody {
   const eclipticFrame = createEclipticFrame();
   const moon = createMoon();
   eclipticFrame.add(moon.plane);
   earthCarrier.add(eclipticFrame);
+  return moon;
+}
 
-  const artificial = ARTIFICIAL_SATELLITES.map((satellite) => {
-    const mesh = createSatelliteModel(satellite.model);
-    mesh.rotation.z = NADIR_POINTING;
-    const carrier = new THREE.Group();
-    carrier.add(mesh);
-    earthCarrier.add(createOrbitPlane(satellite, carrier));
-    // Turning once per orbit keeps the same side facing Earth.
-    return { mesh, spinSpeed: satellite.orbitSpeed, carrier, orbit: satellite };
+/** Adds the ISS and Hubble models; call the result each frame to put them on their dots, facing Earth. */
+export function addArtificialSatellites(
+  earthCarrier: THREE.Object3D,
+  swarm: SatelliteSwarm,
+): () => void {
+  const models = ARTIFICIAL_SATELLITES.map(({ model: kind, catalogNumber }) => {
+    const model = createSatelliteModel(kind);
+    model.visible = false;
+    earthCarrier.add(model);
+    return { model, catalogNumber };
   });
-
-  return [moon, ...artificial];
+  return () => {
+    earthCarrier.getWorldPosition(earthCenter);
+    for (const { model, catalogNumber } of models) {
+      model.visible = swarm.positionOf(catalogNumber, model.position);
+      if (model.visible) model.lookAt(earthCenter);
+    }
+  };
 }
