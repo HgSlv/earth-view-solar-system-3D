@@ -17,6 +17,7 @@ export default tseslint.config(
       },
     },
   },
+  { files: ["scripts/**/*.mjs"], languageOptions: { globals: globals.node } },
   { rules: { complexity: ["error", 10] } },
   prettier,
 );

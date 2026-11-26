@@ -4,6 +4,12 @@ Hey there! Welcome to the Solar System Explorer - a cool 3D journey through our 
 
 Big shoutout to the folks over at [SuboptimalEng's three-js-games](https://github.com/SuboptimalEng/three-js-games.git) for their awesome Three.js example.
 
+Earth has company too: the Moon (true distance, tidally locked) plus the ISS and Hubble, with their models scaled up so you can spot them. Scroll to zoom in on them, or out to find the Moon.
+
+Around them swarm all ~17,000 active satellites (blue: low orbit, green: medium, orange: geostationary), from a [CelesTrak](https://celestrak.org) snapshot. Refresh it with `node scripts/update-satellites.mjs`.
+
+The Moon texture is from [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0).
+
 ## Getting Started
 
 To get this baby up and running on your machine, you'll need Node.js installed. Grab it, then run these commands:

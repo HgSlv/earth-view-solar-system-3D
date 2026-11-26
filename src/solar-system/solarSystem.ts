@@ -1,13 +1,14 @@
 import * as THREE from "three";
-import { SUN, PLANETS, EARTH, type CelestialBody } from "./bodies";
+import { SUN, PLANETS, EARTH } from "./bodies";
+import { createBody, createTiltedAxis } from "./bodyMesh";
+import { addEarthSatellites } from "./earthSatellites";
 import { placeAt, type MovingBody } from "./motion";
-import { loadColorTexture } from "../loadColorTexture";
+import { createSatelliteSwarm } from "./satelliteSwarm";
 
 function linearColor(hex: number): THREE.Color {
   return new THREE.Color().setHex(hex, THREE.LinearSRGBColorSpace);
 }
 
-const SPHERE_SEGMENTS = 64;
 // Intensities carry the π that r155+ lights dropped; linear colours keep the original tint.
 const SUNLIGHT_INTENSITY = 2.2 * Math.PI;
 const SUNLIGHT_COLOR = linearColor(0xfff4e0);
@@ -18,37 +19,6 @@ const NO_DECAY = 0;
 const EUROPE_AND_AFRICA_LONGITUDE = 15;
 const SUN_GLOW_SIZE_IN_RADII = 3;
 const GLOW_TEXTURE_SIZE = 128;
-
-type TexturedMaterial = new (parameters: {
-  map: THREE.Texture;
-}) => THREE.Material;
-
-function createBody(
-  { radius, flattening, texture }: CelestialBody,
-  material: TexturedMaterial,
-): THREE.Mesh {
-  const geometry = new THREE.SphereGeometry(
-    radius,
-    SPHERE_SEGMENTS,
-    SPHERE_SEGMENTS,
-  );
-  geometry.scale(1, 1 - flattening, 1);
-  return new THREE.Mesh(
-    geometry,
-    new material({ map: loadColorTexture(texture) }),
-  );
-}
-
-// The spin axis lives on a separate parent so it keeps pointing the same way all orbit long.
-function createTiltedAxis(
-  mesh: THREE.Mesh,
-  { axialTiltDegrees }: CelestialBody,
-): THREE.Group {
-  const axis = new THREE.Group();
-  axis.rotation.z = THREE.MathUtils.degToRad(axialTiltDegrees);
-  axis.add(mesh);
-  return axis;
-}
 
 // SphereGeometry puts the map's prime meridian on +x and the camera looks from +z.
 function turnToFaceCamera(mesh: THREE.Mesh, longitudeDegrees: number): void {
@@ -117,14 +87,23 @@ const planets = PLANETS.map((planet) => {
   solarSystem.add(carrier);
   return { mesh, spinSpeed: planet.spinSpeed, carrier, orbit: planet };
 });
-export const earth = planets[PLANETS.indexOf(EARTH)].mesh;
+const earthPlanet = planets[PLANETS.indexOf(EARTH)];
+export const earth = earthPlanet.mesh;
 turnToFaceCamera(earth, EUROPE_AND_AFRICA_LONGITUDE);
 
-const movingBodies: readonly MovingBody[] = [sun, ...planets];
+const movingBodies: readonly MovingBody[] = [
+  sun,
+  ...planets,
+  ...addEarthSatellites(earthPlanet.carrier),
+];
+const swarm = createSatelliteSwarm();
+earthPlanet.carrier.add(swarm.points);
+
 let simulatedSeconds = 0;
 placeAt(movingBodies, simulatedSeconds);
 
 export function tick(elapsedSeconds: number): void {
   simulatedSeconds += elapsedSeconds;
   placeAt(movingBodies, simulatedSeconds);
+  swarm.update(simulatedSeconds);
 }

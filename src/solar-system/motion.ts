@@ -17,7 +17,10 @@ export interface MovingBody {
 }
 
 // Newton's method on Kepler's equation M = E − e·sin E.
-function eccentricAnomaly(meanAnomaly: number, eccentricity: number): number {
+export function eccentricAnomaly(
+  meanAnomaly: number,
+  eccentricity: number,
+): number {
   let anomaly = meanAnomaly;
   for (let step = 0; step < KEPLER_ITERATIONS; step++) {
     anomaly -=

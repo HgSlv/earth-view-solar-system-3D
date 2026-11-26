@@ -1,3 +1,5 @@
+import type { Orbit } from "./motion";
+
 const EARTH_RADIUS = 0.6371;
 const EARTH_DISTANCE = 149.6; // average Earth–Sun distance, in millions of km
 // Speeds are in radians per second.
@@ -75,4 +77,77 @@ export const PLANETS: readonly Planet[] = [
     orbitSpeed: EARTH_ORBIT_SPEED * 0.5,
     spinSpeed: EARTH_SPIN_SPEED * 1.03,
   },
+];
+
+export const KM_PER_UNIT = 10_000; // EARTH_RADIUS is 6,371 km
+
+// At the planets' clock a low orbit would take ~2 ms, so everything orbiting
+// Earth shares a slower clock: the ISS takes this long and the rest, the Moon
+// included, follow Kepler's third law so they keep their real relative speeds.
+const ISS_ORBIT_SECONDS = 30;
+const semiMajorAxisAtAltitude = (altitudeKm: number) =>
+  EARTH_RADIUS + altitudeKm / KM_PER_UNIT;
+const ISS_SEMI_MAJOR_AXIS = semiMajorAxisAtAltitude(420);
+
+export function satelliteOrbitSpeed(semiMajorAxis: number): number {
+  return (
+    ((2 * Math.PI) / ISS_ORBIT_SECONDS) *
+    (ISS_SEMI_MAJOR_AXIS / semiMajorAxis) ** 1.5
+  );
+}
+
+export interface Satellite extends Orbit {
+  name: string;
+  inclinationDegrees: number;
+  ascendingNodeDegrees: number;
+}
+
+const MOON_SEMI_MAJOR_AXIS = 384_400 / KM_PER_UNIT;
+const MOON_ORBIT_SPEED = satelliteOrbitSpeed(MOON_SEMI_MAJOR_AXIS);
+
+// Inclination is measured from the ecliptic, like the planets' orbits.
+export const MOON: CelestialBody & Satellite = {
+  name: "moon",
+  radius: EARTH_RADIUS * 0.2727,
+  semiMajorAxis: MOON_SEMI_MAJOR_AXIS,
+  eccentricity: 0.0549,
+  inclinationDegrees: 5.14,
+  ascendingNodeDegrees: 0,
+  flattening: 0.0012,
+  axialTiltDegrees: 6.68,
+  texture: "2k_moon.jpg",
+  orbitSpeed: MOON_ORBIT_SPEED,
+  // Tidally locked: one turn per orbit keeps the near side facing Earth.
+  spinSpeed: MOON_ORBIT_SPEED,
+};
+
+export type SatelliteModel = "station" | "telescope";
+
+export interface ArtificialSatellite extends Satellite {
+  model: SatelliteModel;
+}
+
+function artificial(
+  name: string,
+  model: SatelliteModel,
+  altitudeKm: number,
+  inclinationDegrees: number,
+  ascendingNodeDegrees: number,
+): ArtificialSatellite {
+  const semiMajorAxis = semiMajorAxisAtAltitude(altitudeKm);
+  return {
+    name,
+    model,
+    semiMajorAxis,
+    eccentricity: 0,
+    inclinationDegrees,
+    ascendingNodeDegrees,
+    orbitSpeed: satelliteOrbitSpeed(semiMajorAxis),
+  };
+}
+
+// Inclinations are measured from Earth's equator.
+export const ARTIFICIAL_SATELLITES: readonly ArtificialSatellite[] = [
+  artificial("iss", "station", 420, 51.64, 0),
+  artificial("hubble", "telescope", 535, 28.47, 120),
 ];
