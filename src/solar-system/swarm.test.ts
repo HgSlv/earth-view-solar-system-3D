@@ -16,9 +16,9 @@ describe("semiMajorAxisFromMeanMotion", () => {
 });
 
 describe("writePositions", () => {
-  const equatorial: OrbitRow = [1.0027379, 0, 0, 0, 0, 0];
-  const polar: OrbitRow = [15.5, 0, 90, 0, 0, 90];
-  const eccentric: OrbitRow = [2, 0.7, 63.4, 40, 270, 0];
+  const equatorial: OrbitRow = [1.0027379, 0, 0, 0, 0, 0, 1];
+  const polar: OrbitRow = [15.5, 0, 90, 0, 0, 90, 2];
+  const eccentric: OrbitRow = [2, 0.7, 63.4, 40, 270, 0, 3];
   const orbits = parseSwarm([equatorial, polar, eccentric]);
   const positions = new Float32Array(orbits.periapsis.length);
 

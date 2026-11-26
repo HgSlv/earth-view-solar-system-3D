@@ -14,7 +14,10 @@ export type OrbitRow = [
   ascendingNodeDegrees: number,
   argumentOfPeriapsisDegrees: number,
   meanAnomalyDegrees: number,
+  catalogNumber: number,
 ];
+
+export const catalogNumberOf = (orbit: OrbitRow): number => orbit[6];
 
 export interface SwarmOrbits {
   semiMajorAxis: Float32Array;

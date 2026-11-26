@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { EARTH, KM_PER_UNIT } from "./bodies";
 import {
+  catalogNumberOf,
   parseSwarm,
   writePositions,
   type OrbitRow,
@@ -22,6 +23,13 @@ const SHADOW_BRIGHTNESS = 0.05;
 const OPACITY = 0.6;
 const SUN_WORLD_POSITION = new THREE.Vector3(0, 0, 0);
 const sunDirection = new THREE.Vector3();
+
+export interface SatelliteSwarm {
+  points: THREE.Points;
+  update: (seconds: number) => void;
+  /** Copies a catalogued satellite's dot position (in Earth's frame); false until it is known. */
+  positionOf: (catalogNumber: number, target: THREE.Vector3) => boolean;
+}
 
 // Positions are in Earth's frame, so Earth's shadow is a cylinder of its radius
 // pointing away from the Sun.
@@ -91,10 +99,7 @@ function colorsFor(orbits: SwarmOrbits): Float32Array {
 }
 
 /** Every active satellite as a point; loads its data in the background. */
-export function createSatelliteSwarm(): {
-  points: THREE.Points;
-  update: (seconds: number) => void;
-} {
+export function createSatelliteSwarm(): SatelliteSwarm {
   const geometry = new THREE.BufferGeometry();
   const material = createSunlitPointsMaterial();
   const points = new THREE.Points(geometry, material);
@@ -103,11 +108,15 @@ export function createSatelliteSwarm(): {
   let orbits: SwarmOrbits | undefined;
   const positions = () =>
     geometry.getAttribute("position") as THREE.BufferAttribute;
+  let rowOf = new Map<number, number>();
 
   void fetch(DATA_FILE)
     .then((response) => response.json() as Promise<{ satellites: OrbitRow[] }>)
     .then(({ satellites }) => {
       orbits = parseSwarm(satellites);
+      rowOf = new Map(
+        satellites.map((orbit, row) => [catalogNumberOf(orbit), row]),
+      );
       geometry.setAttribute(
         "position",
         new THREE.BufferAttribute(new Float32Array(orbits.periapsis.length), 3),
@@ -131,6 +140,12 @@ export function createSatelliteSwarm(): {
       material.uniforms.sunDirection.value = points
         .worldToLocal(sunDirection.copy(SUN_WORLD_POSITION))
         .normalize();
+    },
+    positionOf(catalogNumber, target) {
+      const row = rowOf.get(catalogNumber);
+      if (!orbits || row === undefined) return false;
+      target.fromBufferAttribute(positions(), row);
+      return true;
     },
   };
 }
