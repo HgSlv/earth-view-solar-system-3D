@@ -1,6 +1,9 @@
 {
-  "repository": "#",
-  "license": "UNLICENSED",
+  "name": "earth-view-solar-system-3d",
+  "private": true,
+  "type": "module",
+  "license": "CC-BY-NC-SA-4.0",
+  "repository": "github:HgSlv/earth-view-solar-system-3D",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
@@ -34,6 +37,5 @@
     "*.{css,html,json,md,yml}": [
       "prettier --write"
     ]
-  },
-  "type": "module"
+  }
 }

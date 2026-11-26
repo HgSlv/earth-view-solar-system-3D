@@ -1,6 +1,7 @@
 const EARTH_RADIUS = 0.6371;
 const EARTH_DISTANCE = 147.47;
-const EARTH_ORBIT_SPEED = 10 * Math.PI * (1 / 60) * (1 / 60); // radians per frame standing in for 107,000 km/h
+// Speeds are in radians per second.
+const EARTH_ORBIT_SPEED = (10 * Math.PI) / 60; // stands in for 107,000 km/h
 const EARTH_SPIN_SPEED = EARTH_ORBIT_SPEED / 1674.4; // scaled from the 1674.4 km/h equatorial speed
 
 export interface CelestialBody {

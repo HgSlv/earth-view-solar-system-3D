@@ -110,10 +110,10 @@ const earthPlanet = planets.find((planet) => planet.name === "earth");
 if (!earthPlanet) throw new Error("Earth is missing from PLANETS");
 export const earth = earthPlanet.mesh;
 
-export function tick(): void {
+export function tick(elapsedSeconds: number): void {
   for (const { orbit, mesh, orbitSpeed, spinSpeed } of planets) {
-    orbit.rotation.y += orbitSpeed;
-    mesh.rotation.y += spinSpeed;
+    orbit.rotation.y += orbitSpeed * elapsedSeconds;
+    mesh.rotation.y += spinSpeed * elapsedSeconds;
   }
-  sun.mesh.rotation.y += sun.spinSpeed;
+  sun.mesh.rotation.y += sun.spinSpeed * elapsedSeconds;
 }
