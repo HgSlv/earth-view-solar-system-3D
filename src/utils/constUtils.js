@@ -15,4 +15,4 @@ export const MARS_POLAR_RADIUS = MARS_RADIUS * (1 - 0.00648);
 export const SUN_POLAR_RADIUS = SUN_RADIUS * (1 - 0.00015);
 export const EARTH_YEAR = 10 * Math.PI * (1 / 60) * (1 / 60); // 107.000 km/h
 export const EARTH_DAY = EARTH_YEAR / 1674.4; // 1674.4 km/h
-const EARTH_AXIAL_TILT = (23.5 * Math.PI) / 180;
+export const EARTH_AXIAL_TILT = (23.5 * Math.PI) / 180;

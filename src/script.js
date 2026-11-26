@@ -2,7 +2,18 @@ import "./style.css";
 import * as THREE from "three";
 import SceneInit from "./lib/SceneInit";
 
-import { mercuryMesh, mercurySystem, venusMesh, venusSystem, earthMesh, earthSystem, marsMesh, marsSystem, sunMesh, solarSystem } from "./lib/SolarSystem";
+import {
+  mercuryMesh,
+  mercurySystem,
+  venusMesh,
+  venusSystem,
+  earthMesh,
+  earthSystem,
+  marsMesh,
+  marsSystem,
+  sunMesh,
+  solarSystem,
+} from "./lib/SolarSystem";
 import { EARTH_YEAR, EARTH_DAY } from "./utils/constUtils";
 
 const animate = () => {

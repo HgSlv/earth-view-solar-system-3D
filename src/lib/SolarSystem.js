@@ -18,7 +18,6 @@ import {
 } from "../utils/constUtils";
 import Rotation from "./Rotation";
 
-
 export const solarSystem = new THREE.Group();
 
 const sun = new CelestialBody(SUN_RADIUS, 0, "2k_sun.jpg", SUN_POLAR_RADIUS);
@@ -30,7 +29,7 @@ const mercury = new CelestialBody(
   MERCURY_RADIUS,
   MERCURY_DISTANCE,
   "2k_mercury.jpg",
-  MERCURY_POLAR_RADIUS
+  MERCURY_POLAR_RADIUS,
 );
 
 export const mercuryMesh = mercury.getMesh();
@@ -40,7 +39,7 @@ const venus = new CelestialBody(
   VENUS_RADIUS,
   VENUS_DISTANCE,
   "venus.jpeg",
-  VENUS_POLAR_RADIUS
+  VENUS_POLAR_RADIUS,
 );
 
 export const venusMesh = venus.getMesh();
@@ -50,7 +49,7 @@ const earth = new CelestialBody(
   EARTH_RADIUS,
   EARTH_DISTANCE,
   "earth.jpeg",
-  EARTH_POLAR_RADIUS
+  EARTH_POLAR_RADIUS,
 );
 
 export const earthMesh = earth.getMesh();
@@ -60,7 +59,7 @@ const mars = new CelestialBody(
   MARS_RADIUS,
   MARS_DISTANCE,
   "mars.jpeg",
-  MARS_POLAR_RADIUS
+  MARS_POLAR_RADIUS,
 );
 
 export const marsMesh = mars.getMesh();
@@ -71,7 +70,7 @@ solarSystem.add(
   mercurySystem,
   venusSystem,
   earthSystem,
-  marsSystem
+  marsSystem,
 );
 
 const mercuryRotation = new Rotation(mercuryMesh);
