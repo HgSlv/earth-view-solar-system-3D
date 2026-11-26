@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { loadColorTexture } from "../loadColorTexture";
 
 const followedPosition = new THREE.Vector3();
 
@@ -12,13 +13,15 @@ export default class SceneInit {
 
     this.scene = new THREE.Scene();
     this.scene.add(content);
-    this.scene.background = new THREE.TextureLoader().load("2k_stars.jpg");
+    this.scene.background = loadColorTexture("2k_stars.jpg");
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: document.querySelector("canvas.webgl"),
       antialias: true,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 

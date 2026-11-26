@@ -1,37 +1,84 @@
 import * as THREE from "three";
 import { SUN, PLANETS } from "./bodies";
+import { loadColorTexture } from "../loadColorTexture";
 
 const SPHERE_SEGMENTS = 64;
-const textureLoader = new THREE.TextureLoader();
+const SUNLIGHT_INTENSITY = 2.2;
+const NIGHT_SIDE_FILL = 0.08;
+const SUN_GLOW_SIZE_IN_RADII = 3;
+const GLOW_TEXTURE_SIZE = 128;
 
-function createBody({ radius, flattening, texture, distance = 0 }) {
+function createBody({ radius, flattening, texture, distance = 0 }, material) {
   const geometry = new THREE.SphereGeometry(
     radius,
     SPHERE_SEGMENTS,
     SPHERE_SEGMENTS,
   );
   geometry.scale(1, 1 - flattening, 1);
-  const material = new THREE.MeshBasicMaterial({
-    map: textureLoader.load(texture),
-  });
-  const mesh = new THREE.Mesh(geometry, material);
+  const mesh = new THREE.Mesh(
+    geometry,
+    new material({ map: loadColorTexture(texture) }),
+  );
   mesh.position.x = distance;
   return mesh;
 }
 
+function createGlowTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = GLOW_TEXTURE_SIZE;
+  const context = canvas.getContext("2d");
+  const center = GLOW_TEXTURE_SIZE / 2;
+  const gradient = context.createRadialGradient(
+    center,
+    center,
+    0,
+    center,
+    center,
+    center,
+  );
+  gradient.addColorStop(0, "rgba(255, 250, 230, 1)");
+  gradient.addColorStop(0.3, "rgba(255, 220, 160, 0.6)");
+  gradient.addColorStop(0.5, "rgba(255, 170, 90, 0.2)");
+  gradient.addColorStop(1, "rgba(255, 120, 40, 0)");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, GLOW_TEXTURE_SIZE, GLOW_TEXTURE_SIZE);
+  return new THREE.CanvasTexture(canvas);
+}
+
+function createSunGlow() {
+  const glow = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: createGlowTexture(),
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    }),
+  );
+  glow.scale.setScalar(SUN.radius * SUN_GLOW_SIZE_IN_RADII);
+  return glow;
+}
+
 export const solarSystem = new THREE.Group();
 
-const sun = { mesh: createBody(SUN), spinSpeed: SUN.spinSpeed };
-solarSystem.add(sun.mesh);
+// The Sun shines unlit and is the scene's light; planets are lit by it, which
+// gives them a day side and a night side.
+const sun = {
+  mesh: createBody(SUN, THREE.MeshBasicMaterial),
+  spinSpeed: SUN.spinSpeed,
+};
+solarSystem.add(
+  sun.mesh,
+  createSunGlow(),
+  new THREE.PointLight(0xfff4e0, SUNLIGHT_INTENSITY),
+  new THREE.AmbientLight(0x404a66, NIGHT_SIDE_FILL),
+);
 
 const planets = PLANETS.map((planet) => {
-  const mesh = createBody(planet);
+  const mesh = createBody(planet, THREE.MeshStandardMaterial);
   const orbit = new THREE.Group();
   orbit.add(mesh);
   solarSystem.add(orbit);
   return { ...planet, mesh, orbit };
 });
-
 export const earth = planets.find((planet) => planet.name === "earth").mesh;
 
 export function tick() {
