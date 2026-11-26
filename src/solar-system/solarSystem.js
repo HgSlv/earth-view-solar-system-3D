@@ -1,10 +1,15 @@
 import * as THREE from "three";
 import { SUN, PLANETS } from "./bodies";
 
+const SPHERE_SEGMENTS = 64;
 const textureLoader = new THREE.TextureLoader();
 
 function createBody({ radius, flattening, texture, distance = 0 }) {
-  const geometry = new THREE.SphereGeometry(radius, 64, 64);
+  const geometry = new THREE.SphereGeometry(
+    radius,
+    SPHERE_SEGMENTS,
+    SPHERE_SEGMENTS,
+  );
   geometry.scale(1, 1 - flattening, 1);
   const material = new THREE.MeshBasicMaterial({
     map: textureLoader.load(texture),
