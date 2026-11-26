@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { SUN, PLANETS } from "../utils/constUtils";
+import { SUN, PLANETS } from "./bodies";
 
 const textureLoader = new THREE.TextureLoader();
 

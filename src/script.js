@@ -1,7 +1,7 @@
 import "./style.css";
 import * as THREE from "three";
-import SceneInit from "./lib/SceneInit";
-import { solarSystem, sun, planets } from "./lib/SolarSystem";
+import SceneInit from "./scene/SceneInit";
+import { solarSystem, sun, planets } from "./solar-system/solarSystem";
 
 const CAMERA_DISTANCE_FROM_EARTH = 20;
 
