@@ -1,24 +1,20 @@
 import * as THREE from "three";
-import { SUN, PLANETS, type CelestialBody } from "./bodies";
+import { SUN, PLANETS, EARTH, type CelestialBody } from "./bodies";
 import { advance, type MovingBody } from "./motion";
 import { loadColorTexture } from "../loadColorTexture";
 
-function linearColor(red: number, green: number, blue: number): THREE.Color {
-  return new THREE.Color().setRGB(
-    red / 255,
-    green / 255,
-    blue / 255,
-    THREE.LinearSRGBColorSpace,
-  );
+function linearColor(hex: number): THREE.Color {
+  return new THREE.Color().setHex(hex, THREE.LinearSRGBColorSpace);
 }
 
 const SPHERE_SEGMENTS = 64;
-// Light intensities include the π that three's physically based lights (r155+) no
-// longer apply implicitly; colours are linear to keep the original tint.
+// Intensities carry the π that r155+ lights dropped; linear colours keep the original tint.
 const SUNLIGHT_INTENSITY = 2.2 * Math.PI;
-const SUNLIGHT_COLOR = linearColor(0xff, 0xf4, 0xe0);
+const SUNLIGHT_COLOR = linearColor(0xfff4e0);
 const NIGHT_SIDE_FILL = 0.08 * Math.PI;
-const NIGHT_SIDE_COLOR = linearColor(0x40, 0x4a, 0x66);
+const NIGHT_SIDE_COLOR = linearColor(0x404a66);
+const NO_RANGE_LIMIT = 0;
+const NO_DECAY = 0;
 const SUN_GLOW_SIZE_IN_RADII = 3;
 const GLOW_TEXTURE_SIZE = 128;
 
@@ -86,8 +82,7 @@ function createSunGlow(): THREE.Sprite {
 
 export const solarSystem = new THREE.Group();
 
-// The Sun shines unlit and is the scene's light; planets are lit by it, which
-// gives them a day side and a night side.
+// The Sun is the light source, so it is unlit itself; planets get a day and a night side.
 const sun = {
   mesh: createBody(SUN, THREE.MeshBasicMaterial),
   spinSpeed: SUN.spinSpeed,
@@ -95,8 +90,12 @@ const sun = {
 solarSystem.add(
   sun.mesh,
   createSunGlow(),
-  // Distance 0 and decay 0: sunlight doesn't fade across the scene.
-  new THREE.PointLight(SUNLIGHT_COLOR, SUNLIGHT_INTENSITY, 0, 0),
+  new THREE.PointLight(
+    SUNLIGHT_COLOR,
+    SUNLIGHT_INTENSITY,
+    NO_RANGE_LIMIT,
+    NO_DECAY,
+  ),
   new THREE.AmbientLight(NIGHT_SIDE_COLOR, NIGHT_SIDE_FILL),
 );
 
@@ -105,11 +104,14 @@ const planets = PLANETS.map((planet) => {
   const orbit = new THREE.Group();
   orbit.add(mesh);
   solarSystem.add(orbit);
-  return { ...planet, mesh, orbit };
+  return {
+    mesh,
+    orbit,
+    spinSpeed: planet.spinSpeed,
+    orbitSpeed: planet.orbitSpeed,
+  };
 });
-const earthPlanet = planets.find((planet) => planet.name === "earth");
-if (!earthPlanet) throw new Error("Earth is missing from PLANETS");
-export const earth = earthPlanet.mesh;
+export const earth = planets[PLANETS.indexOf(EARTH)].mesh;
 
 const movingBodies: readonly MovingBody[] = [sun, ...planets];
 

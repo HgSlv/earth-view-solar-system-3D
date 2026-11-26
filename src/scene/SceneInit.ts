@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadColorTexture } from "../loadColorTexture";
 
+const FIELD_OF_VIEW = 30;
+const FOLLOW_DISTANCE = 20;
 const followedPosition = new THREE.Vector3();
 
 function findCanvas(): HTMLCanvasElement {
@@ -11,17 +13,12 @@ function findCanvas(): HTMLCanvasElement {
 }
 
 export default class SceneInit {
-  readonly camera: THREE.PerspectiveCamera;
-  readonly scene: THREE.Scene;
-  readonly renderer: THREE.WebGLRenderer;
-  readonly controls: OrbitControls;
+  private readonly camera = new THREE.PerspectiveCamera(FIELD_OF_VIEW);
+  private readonly scene: THREE.Scene;
+  private readonly renderer: THREE.WebGLRenderer;
+  private readonly controls: OrbitControls;
 
-  constructor(content: THREE.Object3D, fov = 30) {
-    this.camera = new THREE.PerspectiveCamera(
-      fov,
-      window.innerWidth / window.innerHeight,
-    );
-
+  constructor(content: THREE.Object3D) {
     this.scene = new THREE.Scene();
     this.scene.add(content);
     this.scene.background = loadColorTexture("2k_stars.jpg");
@@ -30,27 +27,31 @@ export default class SceneInit {
       canvas: findCanvas(),
       antialias: true,
     });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-    window.addEventListener("resize", () => this.onWindowResize());
+    this.fitToWindow();
+    window.addEventListener("resize", () => this.fitToWindow());
   }
 
-  follow(mesh: THREE.Object3D, distance = 20): void {
+  onEachFrame(update: (timestamp: number) => void): void {
+    this.renderer.setAnimationLoop((timestamp) => {
+      update(timestamp);
+      this.renderer.render(this.scene, this.camera);
+      this.controls.update();
+    });
+  }
+
+  follow(mesh: THREE.Object3D): void {
     mesh.getWorldPosition(followedPosition);
     this.controls.target.copy(followedPosition);
     this.camera.position
       .copy(followedPosition)
-      .setZ(followedPosition.z + distance);
+      .setZ(followedPosition.z + FOLLOW_DISTANCE);
   }
 
-  render(): void {
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  onWindowResize(): void {
+  private fitToWindow(): void {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);

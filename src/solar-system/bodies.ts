@@ -24,6 +24,16 @@ export const SUN: CelestialBody = {
   spinSpeed: EARTH_SPIN_SPEED * 14.8,
 };
 
+export const EARTH: Planet = {
+  name: "earth",
+  radius: EARTH_RADIUS,
+  distance: EARTH_DISTANCE,
+  flattening: 1 / 29825,
+  texture: "earth.jpeg",
+  orbitSpeed: EARTH_ORBIT_SPEED,
+  spinSpeed: EARTH_SPIN_SPEED,
+};
+
 export const PLANETS: readonly Planet[] = [
   {
     name: "mercury",
@@ -43,15 +53,7 @@ export const PLANETS: readonly Planet[] = [
     orbitSpeed: EARTH_ORBIT_SPEED * 2,
     spinSpeed: -EARTH_SPIN_SPEED * 243,
   },
-  {
-    name: "earth",
-    radius: EARTH_RADIUS,
-    distance: EARTH_DISTANCE,
-    flattening: 1 / 29825,
-    texture: "earth.jpeg",
-    orbitSpeed: EARTH_ORBIT_SPEED,
-    spinSpeed: EARTH_SPIN_SPEED,
-  },
+  EARTH,
   {
     name: "mars",
     radius: EARTH_RADIUS * 0.53,

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { PLANETS } from "./bodies";
+import { EARTH, PLANETS } from "./bodies";
 
 describe("PLANETS", () => {
   it("includes Earth, which the camera follows", () => {
-    expect(PLANETS.map((planet) => planet.name)).toContain("earth");
+    expect(PLANETS).toContain(EARTH);
   });
 
   it("has unique names", () => {
